@@ -268,6 +268,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <div class="card-footer">
       <span id="status-label" style="font-size: 11px;">Ready</span>
       <div class="btn-group">
+        <button class="btn" id="paste-btn" onclick="pasteClipboard()">Paste</button>
         <button class="btn" onclick="clearInput()">Clear</button>
       </div>
     </div>
@@ -415,6 +416,21 @@ HTML_PAGE = r"""<!DOCTYPE html>
     charCount.textContent = '0 chars';
     clearOutput();
     srcInput.focus();
+  }
+
+  async function pasteClipboard() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        srcInput.value = text;
+        autoResize();
+        const len = srcInput.value.length;
+        charCount.textContent = `${len} char${len === 1 ? '' : 's'}`;
+        doTranslate();
+      }
+    } catch (e) {
+      srcInput.focus();
+    }
   }
 
   async function doTranslate() {
