@@ -1,0 +1,18 @@
+{
+  "command": "python",
+  "args": ["server.py"],
+  "restart_policy": "always",
+  "display_name": "Google Translate",
+  "description": "Translate text, words, and sentences instantly inside Antigravity.",
+  "has_web_ui": true,
+  "ui_config": {
+    "display_name": "Google Translate",
+    "views": [
+      {
+        "entrypoint": "SIDECAR_UI_ENTRYPOINT_AUX_PANE",
+        "path": "/",
+        "title": "Google Translate"
+      }
+    ]
+  }
+}

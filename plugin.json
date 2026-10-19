@@ -1,0 +1,10 @@
+{
+  "name": "translator",
+  "title": "Google Translate",
+  "description": "Built-in Google Translate side-panel for Antigravity. Translate text, code comments, and documents instantly without leaving the IDE.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Community"
+  },
+  "logo": "assets/logo.svg"
+}
