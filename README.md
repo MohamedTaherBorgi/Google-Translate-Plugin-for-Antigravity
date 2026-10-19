@@ -2,6 +2,10 @@
 
 An integrated, zero-token auxiliary side-panel plugin for Google Antigravity. Translate code comments, documentation, and arbitrary text directly inside the IDE workspace without context switching or third-party browser tabs.
 
+<div align="center">
+  <img width="480" alt="Google Translate for Antigravity Preview" src="assets/preview.png" />
+</div>
+
 ---
 
 ## Overview
