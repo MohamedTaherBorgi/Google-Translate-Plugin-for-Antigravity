@@ -156,14 +156,15 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
   textarea {
     width: 100%;
-    min-height: 120px;
+    min-height: 100px;
     background: transparent;
     border: none;
     color: #f8fafc;
     font-family: inherit;
     font-size: 14px;
     line-height: 1.5;
-    resize: vertical;
+    resize: none;
+    overflow-y: hidden;
     outline: none;
     padding: 0;
   }
@@ -366,6 +367,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
     if (lastTranslatedText && lastTranslatedText !== srcInput.value) {
       srcInput.value = lastTranslatedText;
+      autoResize();
     }
     doTranslate();
   }
@@ -381,7 +383,13 @@ HTML_PAGE = r"""<!DOCTYPE html>
     doTranslate();
   });
 
+  function autoResize() {
+    srcInput.style.height = 'auto';
+    srcInput.style.height = Math.max(100, srcInput.scrollHeight) + 'px';
+  }
+
   srcInput.addEventListener('input', () => {
+    autoResize();
     const len = srcInput.value.length;
     charCount.textContent = `${len} char${len === 1 ? '' : 's'}`;
     clearTimeout(debounceTimer);
@@ -403,6 +411,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
   function clearInput() {
     srcInput.value = '';
+    srcInput.style.height = '100px';
     charCount.textContent = '0 chars';
     clearOutput();
     srcInput.focus();
