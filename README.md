@@ -1,25 +1,30 @@
-# Google Translate for Antigravity (`translator`)
+# Google Translate for Antigravity
 
-A clean, instant Google Translate side-panel plugin for **Google Antigravity**.
-
-Translate text, documentation, code comments, and sentences directly inside your IDE without alt-tabbing to Chrome.
+An integrated, zero-token auxiliary side-panel plugin for Google Antigravity. Translate code comments, documentation, and arbitrary text directly inside the IDE workspace without context switching or third-party browser tabs.
 
 ---
 
-## ✨ Features
+## Overview
 
-- **⚡ Fast & Zero-Token:** Powered directly by Google Translate's engine—never consumes AI chat tokens.
-- **🎯 Clean & Minimal UI:** Focused on speed and practicality without visual clutter.
-- **🔄 Auto-Detect & Live Translation:** Translates live as you type with automatic language detection.
-- **🌐 All Major Languages:** English, French, Arabic, Spanish, German, Italian, Portuguese, Russian, Turkish, Chinese, Japanese, and more.
-- **⇄ Quick Swap:** One-click language swapping (`⇄`).
-- **📋 One-Click Copy:** Fast copy button with instant feedback toast.
+Working with multilingual documentation, foreign-language codebases, or prompt engineering across languages typically requires switching between your editor and external translation tools.
+
+This plugin embeds a lightweight Google Translate interface into Antigravity's auxiliary side panel. It operates as a local background process with instant translation, automatic language detection, and zero model token overhead.
 
 ---
 
-## 🚀 Installation
+## Key Features
 
-Clone this repository directly into your Antigravity plugins directory:
+- **Zero Token Overhead:** Translations are processed directly through Google's public translation endpoint, avoiding AI model invocations and preserving your API quotas.
+- **Minimal, Focused Interface:** Designed specifically for developer workflows with a clean dual-pane layout, character counting, and one-click clipboard copying.
+- **Automatic Language Detection:** Identifies source languages automatically as you type, supporting code comments, single terms, or multi-paragraph text.
+- **Bi-directional Swapping:** Instantly invert source and target languages using the swap action (`⇄`).
+- **Broad Language Support:** Full support for major technical and global languages, including English, French, Arabic, Spanish, German, Italian, Portuguese, Russian, Turkish, Chinese, Japanese, Korean, and more.
+
+---
+
+## Installation
+
+Clone this repository into your Antigravity plugins directory:
 
 ### Windows (PowerShell)
 ```powershell
@@ -31,5 +36,45 @@ git clone https://github.com/MohamedTaherBorgi/Google-Translate-for-Antigravity-
 git clone https://github.com/MohamedTaherBorgi/Google-Translate-for-Antigravity-Plugin.git ~/.gemini/config/plugins/translator
 ```
 
-### Enable the Plugin
-Open Antigravity and go to **Customizations $\rightarrow$ Plugins**, then toggle **Google Translate** (`translator`) **ON**.
+### Activation
+1. In Antigravity, open **Customizations &rarr; Plugins**.
+2. Toggle **Google Translate** (`translator`) to **Enabled**.
+3. Python 3 (`python` in system PATH) is required to run the local sidecar runtime.
+
+---
+
+## Usage
+
+1. Open the **Google Translate** panel from Antigravity's auxiliary side pane.
+2. Select your target language (default: English).
+3. Type or paste text into the input field. Translations update automatically with brief input debouncing, or upon pressing `Ctrl+Enter`.
+4. Click **Copy** to place the translated output into your system clipboard.
+
+---
+
+## Technical Details
+
+- **Runtime:** A local lightweight HTTP server binds to loopback (`127.0.0.1`) using a dynamically assigned sidecar port.
+- **Privacy:** Translations are sent securely over HTTPS directly to the translation service. No conversation history, file contents, or personal identifiers are stored or forwarded to third parties.
+
+---
+
+## Project Structure
+
+```text
+translator/
+├── plugin.json                    # Plugin manifest
+├── README.md                      # Documentation
+├── assets/
+│   └── logo.svg                   # Plugin icon
+└── sidecars/
+    └── translator/
+        ├── sidecar.json           # Sidecar registration configuration
+        └── server.py              # Local runtime & translation web UI
+```
+
+---
+
+## License
+
+MIT License. Contributions and improvements are welcome.
