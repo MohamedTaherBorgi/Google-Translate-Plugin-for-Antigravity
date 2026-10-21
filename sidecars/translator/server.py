@@ -1,3 +1,4 @@
+import collections
 import json
 import os
 import urllib.parse
@@ -16,40 +17,114 @@ APP_DATA_DIR = Path(
 )
 PRELOAD_PATH = APP_DATA_DIR / "lib" / "node_modules" / "sidecar_sdk" / "preload.js"
 
+CACHE = collections.OrderedDict()
+CACHE_MAX_SIZE = 500
+
+
+def get_cached(key: str):
+    if key in CACHE:
+        CACHE.move_to_end(key)
+        return CACHE[key]
+    return None
+
+
+def set_cached(key: str, val: dict):
+    CACHE[key] = val
+    CACHE.move_to_end(key)
+    if len(CACHE) > CACHE_MAX_SIZE:
+        CACHE.popitem(last=False)
+
 
 def translate_text(text: str, sl: str = "auto", tl: str = "en"):
     text = (text or "").strip()
     if not text:
         return {"translated": "", "detected": sl}
 
+    cache_key = f"{sl}::{tl}::{text}"
+    cached = get_cached(cache_key)
+    if cached:
+        return cached
+
     encoded = urllib.parse.quote(text)
-    url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={sl}&tl={tl}&dt=t&dt=bd&dt=rm&q={encoded}"
-    req = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "*/*",
-        },
-    )
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "*/*",
+    }
 
-    try:
-        with urllib.request.urlopen(req, timeout=6.0) as resp:
-            data = json.loads(resp.read().decode("utf-8", errors="replace"))
+    # Primary and fallback endpoints (avoiding deprecated/rate-limited client=gtx)
+    endpoints = [
+        # Strategy 1: Google Translate API (dict-chrome-ex client)
+        (
+            f"https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl={sl}&tl={tl}&dt=t&dt=bd&dt=rm&q={encoded}",
+            "single",
+        ),
+        # Strategy 2: Google clients5 mirror
+        (
+            f"https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl={sl}&tl={tl}&q={encoded}",
+            "t",
+        ),
+        # Strategy 3: Google Translate (at client)
+        (
+            f"https://translate.google.com/translate_a/single?client=at&sl={sl}&tl={tl}&dt=t&q={encoded}",
+            "single",
+        ),
+    ]
 
-        translated_parts = []
-        if data and isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
-            for part in data[0]:
-                if part and isinstance(part, list) and len(part) > 0 and part[0]:
-                    translated_parts.append(part[0])
+    last_error = None
+    for url, parser_type in endpoints:
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=5.0) as resp:
+                data = json.loads(resp.read().decode("utf-8", errors="replace"))
 
-        translated = "".join(translated_parts)
-        detected = sl
-        if len(data) > 2 and isinstance(data[2], str):
-            detected = data[2]
+            if parser_type == "single":
+                translated_parts = []
+                if data and isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
+                    for part in data[0]:
+                        if part and isinstance(part, list) and len(part) > 0 and part[0]:
+                            translated_parts.append(str(part[0]))
+                translated = "".join(translated_parts)
+                detected = sl
+                if len(data) > 2 and isinstance(data[2], str):
+                    detected = data[2]
+            else:
+                translated_parts = []
+                detected = sl
+                if isinstance(data, list):
+                    for item in data:
+                        if isinstance(item, list) and len(item) > 0:
+                            if item[0]:
+                                translated_parts.append(str(item[0]))
+                            if len(item) > 1 and isinstance(item[1], str) and detected == sl:
+                                detected = item[1]
+                        elif isinstance(item, str):
+                            translated_parts.append(item)
+                translated = "".join(translated_parts)
 
-        return {"translated": translated, "detected": detected}
-    except Exception as e:
-        return {"error": str(e), "translated": "", "detected": sl}
+            if translated:
+                result = {"translated": translated, "detected": detected}
+                set_cached(cache_key, result)
+                return result
+        except Exception as e:
+            last_error = e
+            continue
+
+    # Strategy 4: If sl is not auto, try MyMemory as secondary external fallback
+    if sl != "auto":
+        try:
+            mm_url = f"https://api.mymemory.translated.net/get?q={encoded}&langpair={sl}|{tl}"
+            req = urllib.request.Request(mm_url, headers=headers)
+            with urllib.request.urlopen(req, timeout=5.0) as resp:
+                data = json.loads(resp.read().decode("utf-8", errors="replace"))
+            translated = data.get("responseData", {}).get("translatedText", "")
+            if translated and not translated.startswith("MYMEMORY WARNING"):
+                result = {"translated": translated, "detected": sl}
+                set_cached(cache_key, result)
+                return result
+        except Exception as e:
+            last_error = e
+
+    return {"error": str(last_error or "Translation failed"), "translated": "", "detected": sl}
 
 
 HTML_PAGE = r"""<!DOCTYPE html>
@@ -270,6 +345,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       <div class="btn-group">
         <button class="btn" id="paste-btn" onclick="pasteClipboard()">Paste</button>
         <button class="btn" onclick="clearInput()">Clear</button>
+        <button class="btn" style="background:#2563eb; border-color:#3b82f6; color:#ffffff;" onclick="doTranslate()" title="Translate (Ctrl+Enter)">Translate</button>
       </div>
     </div>
   </div>
@@ -389,6 +465,14 @@ HTML_PAGE = r"""<!DOCTYPE html>
     srcInput.style.height = Math.max(100, srcInput.scrollHeight) + 'px';
   }
 
+  srcInput.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      clearTimeout(debounceTimer);
+      doTranslate();
+    }
+  });
+
   srcInput.addEventListener('input', () => {
     autoResize();
     const len = srcInput.value.length;
@@ -399,7 +483,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
       return;
     }
     statusLabel.textContent = 'Translating...';
-    debounceTimer = setTimeout(doTranslate, 280);
+    debounceTimer = setTimeout(doTranslate, 450);
   });
 
   function clearOutput() {
