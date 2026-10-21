@@ -345,7 +345,6 @@ HTML_PAGE = r"""<!DOCTYPE html>
       <div class="btn-group">
         <button class="btn" id="paste-btn" onclick="pasteClipboard()">Paste</button>
         <button class="btn" onclick="clearInput()">Clear</button>
-        <button class="btn" style="background:#2563eb; border-color:#3b82f6; color:#ffffff;" onclick="doTranslate()" title="Translate (Ctrl+Enter)">Translate</button>
       </div>
     </div>
   </div>

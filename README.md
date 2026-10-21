@@ -20,7 +20,7 @@ This plugin embeds a lightweight Google Translate interface into Antigravity's a
 
 - **Zero Token Overhead:** Translations are processed directly through Google's public translation endpoints, avoiding AI model invocations and preserving your API quotas.
 - **Resilient Multi-Tier Fallback & Caching:** Multi-endpoint failover architecture with in-memory caching to eliminate rate limits (HTTP 429) and network drops.
-- **Minimal, Focused Interface:** Designed specifically for developer workflows with a clean dual-pane layout, character counting, manual translate trigger, and one-click clipboard copying.
+- **Minimal, Focused Interface:** Designed specifically for developer workflows with a clean dual-pane layout, character counting, and one-click clipboard copying.
 - **Automatic Language Detection:** Identifies source languages automatically as you type, supporting code comments, single terms, or multi-paragraph text.
 - **Bi-directional Swapping:** Instantly invert source and target languages using the swap action (`⇄`).
 - **Keyboard Shortcuts:** Trigger instant translation on demand using `Ctrl+Enter` (`Cmd+Enter` on macOS).
