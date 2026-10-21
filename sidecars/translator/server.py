@@ -151,6 +151,54 @@ HTML_PAGE = r"""<!DOCTYPE html>
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    container-type: inline-size;
+  }
+
+  /* Topbar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: #f8fafc;
+    white-space: nowrap;
+  }
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: rgba(14, 165, 233, 0.12);
+    border: 1px solid rgba(14, 165, 233, 0.25);
+    color: #38bdf8;
+    flex-shrink: 0;
+  }
+  .brand-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+  .dot-live {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 6px #10b981;
+    flex-shrink: 0;
   }
 
   /* Header & Language Bar */
@@ -321,16 +369,46 @@ HTML_PAGE = r"""<!DOCTYPE html>
     z-index: 100;
   }
   .toast.show { opacity: 1; }
+
+  /* Responsive & Container Queries */
+  @container (max-width: 340px) {
+    .wrap { padding: 8px; }
+    .lang-select { font-size: 11.5px; padding: 6px 8px; }
+    .swap-btn { width: 30px; height: 30px; }
+    .card { padding: 10px; }
+    .btn { padding: 3px 8px; font-size: 10.5px; }
+  }
+  @media (max-width: 360px) {
+    .wrap { padding: 8px; }
+    .lang-select { font-size: 11.5px; padding: 6px 8px; }
+    .swap-btn { width: 30px; height: 30px; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- Clean Minimal Language Bar -->
+  <!-- Clean Top Bar -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <span>Google Translate</span>
+    </div>
+    <div class="brand-status">
+      <span class="dot-live" title="Translator ready"></span>
+      <span>Live</span>
+    </div>
+  </div>
+
+  <!-- Language Bar -->
   <div class="lang-bar">
-    <select id="sl-select" class="lang-select"></select>
-    <button id="swap-btn" class="swap-btn" onclick="swapLangs()" title="Swap languages">⇄</button>
-    <select id="tl-select" class="lang-select"></select>
+    <select id="sl-select" class="lang-select" aria-label="Source Language"></select>
+    <button id="swap-btn" class="swap-btn" onclick="swapLangs()" title="Swap languages" aria-label="Swap languages">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+    </button>
+    <select id="tl-select" class="lang-select" aria-label="Target Language"></select>
   </div>
 
   <!-- Input Card -->
@@ -343,8 +421,14 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <div class="card-footer">
       <span id="status-label" style="font-size: 11px;">Ready</span>
       <div class="btn-group">
-        <button class="btn" id="paste-btn" onclick="pasteClipboard()">Paste</button>
-        <button class="btn" onclick="clearInput()">Clear</button>
+        <button class="btn" id="paste-btn" onclick="pasteClipboard()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          Paste
+        </button>
+        <button class="btn" onclick="clearInput()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Clear
+        </button>
       </div>
     </div>
   </div>
@@ -361,7 +445,10 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <div class="card-footer">
       <span></span>
       <div class="btn-group">
-        <button class="btn btn-copy" id="copy-btn" onclick="copyTranslation()">Copy</button>
+        <button class="btn btn-copy" id="copy-btn" onclick="copyTranslation()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
       </div>
     </div>
   </div>
