@@ -192,6 +192,10 @@ HTML_PAGE = r"""<!DOCTYPE html>
     font-size: 11px;
     color: #94a3b8;
   }
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.85); opacity: 0.6; }
+  }
   .dot-live {
     width: 6px;
     height: 6px;
@@ -199,6 +203,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
     background: #10b981;
     box-shadow: 0 0 6px #10b981;
     flex-shrink: 0;
+    animation: dotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   /* Header & Language Bar */
@@ -219,9 +224,14 @@ HTML_PAGE = r"""<!DOCTYPE html>
     cursor: pointer;
     outline: none;
     font-weight: 500;
+    transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .lang-select:hover {
+    border-color: rgba(255, 255, 255, 0.2);
   }
   .lang-select:focus {
     border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
   }
   .swap-btn {
     background: #131c31;
@@ -235,13 +245,17 @@ HTML_PAGE = r"""<!DOCTYPE html>
     justify-content: center;
     cursor: pointer;
     font-size: 15px;
-    transition: all 0.15s ease;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     flex-shrink: 0;
   }
   .swap-btn:hover:not(:disabled) {
     background: #1e293b;
     color: #38bdf8;
     border-color: #38bdf8;
+    transform: rotate(180deg) scale(1.06);
+  }
+  .swap-btn:active:not(:disabled) {
+    transform: rotate(180deg) scale(0.92);
   }
   .swap-btn:disabled {
     opacity: 0.35;
@@ -257,6 +271,11 @@ HTML_PAGE = r"""<!DOCTYPE html>
     margin-bottom: 12px;
     display: flex;
     flex-direction: column;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card:focus-within {
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
   }
   .card.target {
     background: #0e172a;
@@ -335,11 +354,16 @@ HTML_PAGE = r"""<!DOCTYPE html>
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    transition: all 0.15s ease;
+    transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    user-select: none;
   }
   .btn:hover {
     background: #334155;
     color: #f8fafc;
+    transform: translateY(-1px);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.96);
   }
   .btn-copy {
     background: #2563eb;
@@ -349,26 +373,33 @@ HTML_PAGE = r"""<!DOCTYPE html>
   }
   .btn-copy:hover {
     background: #1d4ed8;
+    transform: translateY(-1px);
+  }
+  .btn-copy:active {
+    transform: translateY(0) scale(0.96);
   }
 
   .toast {
     position: fixed;
     bottom: 20px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, 20px) scale(0.9);
     background: #10b981;
     color: #0b1120;
     padding: 6px 14px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
     z-index: 100;
   }
-  .toast.show { opacity: 1; }
+  .toast.show {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
 
   /* Responsive & Container Queries */
   @container (max-width: 340px) {
